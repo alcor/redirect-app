@@ -1,3 +1,73 @@
+
+<script>
+
+function navigateTo(url) {
+  console.log("Go", url)
+  document.body.innerText = "Opening " + url
+  location.replace(url)
+}
+
+function showFallback(primary, fallback) {
+  // For a url fallback, navigate, else show message, then try primary
+  if (fallback.indexOf("http") == 0 ) {
+    navigateTo(fallback);
+  } else { 
+    var message = fallback.length ? fallback : (new URL(primary).host) + " may not be accessible.";
+    alert(decodeURIComponent(message));
+    navigateTo(primary);
+  }
+}
+
+function redirect() {
+  var path = location.hash.substring(1)
+
+  if (!path || path.length == 0) { // Fall back to the root website
+    navigateTo('https://www.redirect.app')
+  } else {
+    var components = path.split("?FALLBACK=")
+    var primary = components.shift()
+    var fallback = components.shift()
+    var isMobile = /android|ipad|iphone|ipod/i.test(navigator.userAgent);
+    console.log("Navigating", primary, fallback)
+
+    // If no fallback is specified, always navigate
+    if (fallback == undefined) {
+      return navigateTo(primary);
+    }
+
+
+    var isCustomURL = primary.indexOf("http") != 0
+
+    if (isCustomURL) {
+      if (!isMobile) { // On desktop, load primary for custom URL schemes
+        navigateTo(primary)
+      } else { // On mobile load the url in an iframe and fallback after timeout, cancelling if too much time has passed
+        document.getElementById('loader').src = primary
+        var timestamp = +new Date, timeout = 100;
+        window.setTimeout(function (){
+          if (+new Date - timestamp < timeout * 2){
+            showFallback(primary, fallback);
+          } else {
+            console.log('too late');
+          }
+        }, timeout);
+      }
+    } else { // Test for a favicon and forward, or prompt then forward
+      var imageURL = new URL(primary)
+      imageURL.pathname = "/favicon.ico"
+
+      var i = new Image();
+      i.onload = function(e) {
+        navigateTo(primary)
+      }
+      i.onerror = function(e) {
+        showFallback(primary, fallback)
+      }
+      i.src = imageURL;
+    } 
+  }
+}
+</script>
 <style type="text/css"> 
 body {
   font-family:sans-serif;
@@ -7,72 +77,6 @@ body {
   margin-top:30vh;
 }
 </style>
+<body onload="redirect()">
 <iframe style="display:none" height="0" width="0" id="loader"></iframe>
-<script>
-
-function navigateTo(url) {
-  console.log("Go", url)
-  document.body.innerText = "Opening " + url
-  location.replace(url)
-}
-function redirect() {
-  var path = location.hash.substring(1)
-  if (path && path.length > 0) {
-    var components = path.split("?FALLBACK=")
-    var primary = components.shift()
-    var fallback = components.shift()
-    var isMobile = /android|ipad|iphone|ipod/i.test(navigator.userAgent);
-    console.log("Navigating", primary, fallback)
-
-    // If no fallback is specified, always navigate
-    if (fallback == undefined) return navigateTo(primary);
-
-
-    var showFallback = function() {
-    	
-    	// For a url fallback, navigate, else show message, then try primary
-    	if (fallback.indexOf("http") == 0 ) {
-    		navigateTo(fallback);
-    	} else { 
-    		var message = fallback.length ? fallback : (new URL(primary).host) + " may not be accessible.";
-    		alert(decodeURIComponent(message));
-    		navigateTo(primary);
-    	}
-    }
-
-    if (primary.indexOf("http") == 0) { // Test the favicon at the url's root and fallback on error
-
-    	var imageURL = new URL(primary)
-    	imageURL.pathname = "/favicon.ico"
-
-    	var i = new Image();
-    	i.onload = function(e) {
-    		navigateTo(primary)
-    	}
-    	i.onerror = function(e) {
-    		showFallback()
-    	}
-    	i.src = imageURL;
-
-    } else if (isMobile) { // Load the url in an iframe and fallback after timeout, cancelling if too much time has passed
-
-    	document.getElementById('loader').src = primary
-    	var timestamp = +new Date, timeout = 100;
-    	window.setTimeout(function (){
-    		if (+new Date - timestamp < timeout * 2){
-    			showFallback();
-    		} else {
-    			console.log('too late');
-    		}
-    	}, timeout);
-    } else { // On desktop, load primary for custom URL schemes
-      navigateTo(primary)
-    }
-  } else { // Fall back to the root website
-  	navigateTo('https://www.redirect.app')
-  }
-}
-
-redirect();
-
-</script>
+</body>
