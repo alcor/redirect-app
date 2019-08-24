@@ -1,16 +1,61 @@
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Redirect.app</title>
 <script>
 
-function navigateTo(url) {
+window.onerror = function(error) {alert(error)};
+var REDIRECT_URL = 'REDIRECT_URL'
+var storedValue = (document.cookie.split(REDIRECT_URL + '=')[1]||'').split(';').shift();
+
+function askForDestination(url) {
+  url = prompt([
+    "This app opens other sites and URLs", 
+    "",
+    "Please choose a website to go to when you visit redirect.app:"].join("\n"),
+    url || "https://");
+
+  if (url != null) {
+    var cookie = (REDIRECT_URL + '=' + url + '; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/')
+    document.cookie = cookie;
+    navigateTo(url, 3000, true);
+  }
+  return false;
+}
+
+function navigateTo(url, duration, allowEdit) {
   console.log("Go", url)
-  document.body.innerText = "Opening " + url
-  location.replace(url)
+
+  var edit = document.getElementById('edit');
+  var text = document.getElementById("text")
+  var link = document.getElementById("link");
+
+  text.innerText = "Opening";
+  link.innerText = link.href = url
+
+  var timeout = setTimeout(function(){
+    location.href = url;
+  }, duration === undefined ? 0 : duration);
+
+  var interval = setInterval(function() {
+    text.innerText = " " + text.innerText + ".";
+  }, 1000);
+  
+
+  if (allowEdit) {
+    edit.onclick = function() {
+      clearTimeout(timeout);
+      clearInterval(interval);
+      askForDestination(url);
+    };
+    edit.innerText = "edit";
+  }
+
 }
 
 function showFallback(primary, fallback) {
   // For a url fallback, navigate, else show message, then try primary
   if (fallback.indexOf("http") == 0 ) {
-    navigateTo(fallback);
+    navigateTo(fallback, 3000);
   } else { 
     var message = fallback.length ? fallback : (new URL(primary).host) + " may not be accessible.";
     alert(decodeURIComponent(message));
@@ -22,7 +67,9 @@ function redirect() {
   var path = location.hash.substring(1)
 
   if (!path || path.length == 0) { // Fall back to the root website
-    navigateTo('https://www.redirect.app')
+    var isWebkit5 = navigator.userAgent.indexOf("AppleWebKit/534.26+") != -1;
+    var defaultSite = isWebkit5 ? 'https://m.redirect.app' : 'https://www.redirect.app';
+    navigateTo(storedValue || defaultSite, 4000, true)
   } else {
     var components = path.split("?FALLBACK=")
     var primary = components.shift()
@@ -34,7 +81,6 @@ function redirect() {
     if (fallback == undefined) {
       return navigateTo(primary);
     }
-
 
     var isCustomURL = primary.indexOf("http") != 0
 
@@ -68,15 +114,13 @@ function redirect() {
   }
 }
 </script>
-<style type="text/css"> 
-body {
-  font-family:sans-serif;
-  text-align: center;
-  margin:auto;
-  width: 320px;
-  margin-top:30vh;
-}
+<style>
+
 </style>
-<body onload="redirect()">
+<body onload="redirect()" style="font-family:-apple-system, BlinkMacSystemFont,'Helvetica Neue', 'Helvetica Neue LT', sans-serif; text-align: center; margin:auto; width: 320px; 
+margin-top:20%; margin-top:30vh;">
+<div id="text" style="font-weight: 400; margin-bottom:0.5em"></div>
+<a id="link" href="#" style="text-decoration:none; font-size:smaller;"></div>
+<a id="edit" href="#" style="display:block; margin-top:0.5em; padding:1em; font-size:smaller; color:rgba(0,0,0,0.6);"></div>
 <iframe style="display:none" height="0" width="0" id="loader"></iframe>
 </body>
