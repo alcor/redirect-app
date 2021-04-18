@@ -15,6 +15,7 @@ function askForDestination(url) {
     url || "https://");
 
   if (url != null) {
+    if (url.indexOf(":") < 0) url = "http://" + url;
     var cookie = (REDIRECT_URL + '=' + url + '; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/')
     document.cookie = cookie;
     navigateTo(url, 3000, true);
@@ -26,7 +27,7 @@ function navigateTo(url, duration, allowEdit) {
   console.log("Go", url)
 
   var edit = document.getElementById('edit');
-  var text = document.getElementById("text")
+  var text = document.getElementById("text");
   var link = document.getElementById("link");
 
   text.innerText = "Opening";
@@ -68,8 +69,11 @@ function redirect() {
 
   if (!path || path.length == 0) { // Fall back to the root website
     var isWebkit5 = navigator.userAgent.indexOf("AppleWebKit/534.26+") != -1;
-    var defaultSite = isWebkit5 ? 'https://m.redirect.app' : 'https://www.redirect.app';
-    navigateTo(storedValue || defaultSite, 4000, true)
+    if (!storedValue && isWebkit5) {
+      askForDestination("http://example.com")
+    } else {    
+      navigateTo(storedValue || 'https://www.redirect.app', 4000, true)
+    }
   } else {
     var components = path.split("?FALLBACK=")
     var primary = components.shift()
