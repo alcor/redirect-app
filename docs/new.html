@@ -1,0 +1,48 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Redirect.app</title>
+<style>body {font-family:sans-serif; max-width:30em; margin:10vmin auto;} input {width:100%;}</style>
+<script> 
+function parse() {
+  let formData = new FormData(document.forms[0]);
+  var object = {};
+
+  let url = formData.get("url");
+  formData.delete("url")
+  let title = formData.get("t");
+  formData.delete("t")
+
+  if (!title.length) return;
+  console.log("object", object);
+  let path = `/${title}`
+  let encodedFields = ["i", "v"];
+  formData.forEach((value, key) => {
+    if (!value.length) continue;
+    if (encodedFields.includes(key)) value = btoa(key)
+    path += `/${key}/${value}`
+  });
+  formData.forEach((value, key) => {if (value.length) object[key] = value});
+
+
+
+  path += "#" + url;
+  console.log(path);
+  history.replaceState(null, path, path);
+}
+</script>
+<form id="form" onsubmit="parse(); return false;">
+  <label for="url">Link URL</label><br>
+  <input name="url" oninput="parse()"><p>
+  <label for="t">Title</label><br>
+  <input name="t" oninput="parse()"><p>
+  <label for="d">Description</label><br>
+  <input name="d" oninput="parse()"><p>
+  <label for="i">Image URL</label><br>
+  <input name="i" oninput="parse()"><p>
+  <label for="f">Favicon/Emoji</label><br>
+  <input name="f" oninput="parse()"><p>
+  <button type="sumbit" style="display:none">submit</button>
+  
+</form>
+
+
