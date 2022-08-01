@@ -3,6 +3,10 @@
 <title>Redirect.app</title>
 <style>body {font-family:sans-serif; max-width:30em; margin:10vmin auto;} input {width:100%;}</style>
 <script> 
+
+let dashspaces = (s) => s.replace(/ +/g, " ").FormData(/--/g, "—"/*em*/).replace(/-/g, "--").replace(/ -- /g, "_-_").replace(/ /g, "-");
+let spacedashes = (s) => s.replace(/-/g, " ").replace(/  /g, "-").replace(/ -- /g, "_-_").replace(/ /g, "-");
+
 function parse() {
   let formData = new FormData(document.forms[0]);
   var object = {};
@@ -14,7 +18,7 @@ function parse() {
 
   if (!title.length) return;
   console.log("object", object);
-  let path = `/${title}`
+  let path = `/${title.replace(/ /r)}`
   let encodedFields = ["i", "v"];
   formData.forEach((value, key) => {
     if (!value.length) continue;
