@@ -56,9 +56,8 @@ let handleCommand = (event, json) => {
   
   let description = options.description
 
-  let headers = {'Content-Type': 'application/json'}; 
   let reply = {type: 4}
-  
+
   let embed = description?.length > 0;  
   if (embed) {
     let content = { title: "__" + title + "__", url, description }
@@ -79,15 +78,15 @@ let handleCommand = (event, json) => {
     //   {name: "key2", value:"value2", inline:true}  
     // ]
 
-    reply.data = {headers, embeds:[content]}
+    reply.data = {embeds:[content]}
   } else {
-    reply.data = {headers, content: `__[${title}](${url})__`};
+    reply.data = {content: `__[${title}](${url})__`};
   }
   
   
-  console.log("->", reply);
   
   reply = JSON.stringify(reply)
-  
-  return  {statusCode: 200, body: reply}
+  console.log("->", reply);
+  let headers = {'Content-Type': 'application/json'}; 
+  return  {statusCode: 200, headers, body: reply}
 }
