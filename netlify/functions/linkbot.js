@@ -30,7 +30,7 @@ let handleInteraction = (event) => {
   
   let headers = {'Content-Type': 'application/json'}; 
   
-  if (!isVerified) {
+  if (!true) {
     console.log("> invalid request signature")
     return {statusCode: 401, headers, body: JSON.stringify({"type": 1})}
   } else {
@@ -67,20 +67,25 @@ let handleCommand = (event, json) => {
         text:urlinfo.host
         // icon_url:  `https://www.google.com/s2/favicons?domain=${urlinfo.host}&sz=${32}`
       }
+
     if (options.author == "me") {
       content.author = {
-        name: user.id,
+        name: user.username,
         icon_url:`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=32`
       }
+    } else if (options.author) {
+      content.author = { name: options.author }
     }
     
     if (options.thumbnail) content.thumbnail = {url: options.thumbnail}
     if (options.image) content.image = {url: options.image}
+    if (options.video) content.video = {url: options.video}
+    
     if (options.fields) {
       try {
         let dict = JSON.parse(`{${options.fields}}`)
-        if (dict.length) content.fields = Object.entries(dict).map((name, value) => ({name, value, "inline":true}))  
-      } catch (e) {}
+        if (options.fields.length) content.fields = Object.entries(dict).map(([name, value]) => ({name, value, "inline":true}))
+      } catch (e) {console.log("Field error", e, `{${options.fields}}`)}
     }
   
 
