@@ -47,6 +47,7 @@ let handleCommand = (event, json) => {
   let action = json.data.name;
   let options = Object.fromEntries(json.data.options.map(o => [o.name, o.value]));
 
+  console.log("Interaction: ", JSON.stringify(json))
   let url = options.url
   if (!url.includes(":")) url = "https://" + options.url
 
@@ -66,9 +67,9 @@ let handleCommand = (event, json) => {
         text:urlinfo.host
         // icon_url:  `https://www.google.com/s2/favicons?domain=${urlinfo.host}&sz=${32}`
       }
-    if (options.author) {
+    if (options.author == "me") {
       content.author = {
-        name: author || user.id,
+        name: user.id,
         icon_url:`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=32`
       }
     }
@@ -76,8 +77,10 @@ let handleCommand = (event, json) => {
     if (options.thumbnail) content.thumbnail = {url: options.thumbnail}
     if (options.image) content.image = {url: options.image}
     if (options.fields) {
-      let dict = JSON.parse(`{${dict}}`)
-      content.fields = Object.entries(dict).map((name, value) => ({name, value, "inline":true}))
+      try {
+        let dict = JSON.parse(`{${options.fields}}`)
+        if (dict.length) content.fields = Object.entries(dict).map((name, value) => ({name, value, "inline":true}))  
+      } catch (e) {}
     }
   
 
