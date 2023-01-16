@@ -23,28 +23,24 @@ let handleInteraction = (event) => {
   const signature = event.headers['x-signature-ed25519'];
   const timestamp = event.headers['x-signature-timestamp'];
   const isVerified = tweetnacl.sign.detached.verify(
-    Buffer.from(timestamp + body),
+    Buffer.from(timestamp + event.body),
     Buffer.from(signature, 'hex'),
     Buffer.from(PUBLIC_KEY, 'hex')
   );
   
-  // res.setHeader('Content-Type', 'application/json');
-
-  let json = JSON.parse(body);
-  console.log(event.url)  
+  let headers = {'Content-Type': 'application/json'}; 
   
   if (!isVerified) {
     console.log("> invalid request signature")
-    return {statusCode: 401, body: JSON.stringify({"type": 1})}
+    return {statusCode: 401, headers, body: JSON.stringify({"type": 1})}
   } else {
-    let json = JSON.parse(body);
+    let json = JSON.parse(event.body);
     if (json.type == 1) {
-      return {statusCode: 200, body: JSON.stringify({"type": 1})}
+      return {statusCode: 200, headers, body: JSON.stringify({"type": 1})}
     }
     return handleCommand(event, json)
   }
 }
-
 
 let handleCommand = (event, json) => {
   let user = json.user;

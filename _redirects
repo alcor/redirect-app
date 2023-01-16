@@ -1,2 +1,2 @@
 # Redirects from what the browser requests to what we serve
-/bot/link/interaction /.netlify/functions/linkbot 200
+/bot/link/interactions /.netlify/functions/linkbot 200
