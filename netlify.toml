@@ -3,6 +3,11 @@ path = "/*/*"
 function = "index"
 
 [[redirects]]
+  from = "/bot/link"
+  to = "/.netlify/functions/linkbot"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

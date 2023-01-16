@@ -55,10 +55,11 @@ let handleCommand = (event, json) => {
   if (title.length > 28) title = title.substring(0, 28) + "..."
   
   let description = options.description
-  
-  let embed = description?.length > 0;
+
+  let headers = {'Content-Type': 'application/json'}; 
   let reply = {type: 4}
   
+  let embed = description?.length > 0;  
   if (embed) {
     let content = { title: "__" + title + "__", url, description }
     content.color = 2844376;
@@ -78,9 +79,9 @@ let handleCommand = (event, json) => {
     //   {name: "key2", value:"value2", inline:true}  
     // ]
 
-    reply.data = {embeds:[content]}
+    reply.data = {headers, embeds:[content]}
   } else {
-    reply.data = {content: `__[${title}](${url})__`};
+    reply.data = {headers, content: `__[${title}](${url})__`};
   }
   
   
