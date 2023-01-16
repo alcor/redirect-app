@@ -44,7 +44,7 @@ let handleInteraction = (event) => {
 
 let handleCommand = (event, json) => {
   let user = json.user;
-
+  let action = json.data.name;
   let options = Object.fromEntries(json.data.options.map(o => [o.name, o.value]));
 
   let url = options.url
@@ -58,7 +58,7 @@ let handleCommand = (event, json) => {
 
   let reply = {type: 4}
 
-  let embed = description?.length > 0;  
+  let embed = description?.length > 0 || action == "embed";  
   if (embed) {
     let content = { title: "__" + title + "__", url, description }
     content.color = 2844376;
@@ -66,17 +66,20 @@ let handleCommand = (event, json) => {
         text:urlinfo.host
         // icon_url:  `https://www.google.com/s2/favicons?domain=${urlinfo.host}&sz=${32}`
       }
-    // content.author = {
-    //     name: url.host,
-    //     icon_url:`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=32`
-    // }
-    // content.timestamp = "2018-12-10T13:49:51.141Z"
+    if (options.author) {
+      content.author = {
+        name: author || user.id,
+        icon_url:`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=32`
+      }
+    }
+    
     if (options.thumbnail) content.thumbnail = {url: options.thumbnail}
     if (options.image) content.image = {url: options.image}
-    // content.fields = [
-    //   {name: "key1", value:"value1"},
-    //   {name: "key2", value:"value2", inline:true}  
-    // ]
+    if (options.fields) {
+      let dict = JSON.parse(`{${dict}}`)
+      content.fields = Object.entries(dict).map((name, value) => ({name, value, "inline":true}))
+    }
+  
 
     reply.data = {embeds:[content]}
   } else {
@@ -86,7 +89,7 @@ let handleCommand = (event, json) => {
   
   
   reply = JSON.stringify(reply)
-  console.log("->", reply);
+  console.log("REPLY", reply);
   let headers = {'Content-Type': 'application/json'}; 
   return  {statusCode: 200, headers, body: reply}
 }
