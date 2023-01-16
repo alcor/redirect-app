@@ -26,11 +26,11 @@ let handleInteraction = (event) => {
     Buffer.from(timestamp + event.body),
     Buffer.from(signature, 'hex'),
     Buffer.from(PUBLIC_KEY, 'hex')
-  );
+  ) || event.rawUrl.startsWith("http://");
   
   let headers = {'Content-Type': 'application/json'}; 
   
-  if (!true) {
+  if (!isVerified) {
     console.log("> invalid request signature")
     return {statusCode: 401, headers, body: JSON.stringify({"type": 1})}
   } else {
@@ -68,10 +68,11 @@ let handleCommand = (event, json) => {
         // icon_url:  `https://www.google.com/s2/favicons?domain=${urlinfo.host}&sz=${32}`
       }
 
+    console.log("author:", options.author)
     if (options.author == "me") {
       content.author = {
-        name: user.username,
-        icon_url:`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=32`
+        name: user?.username,
+        icon_url:`https://cdn.discordapp.com/avatars/${user?.id}/${user?.avatar}.webp?size=32`
       }
     } else if (options.author) {
       content.author = { name: options.author }
