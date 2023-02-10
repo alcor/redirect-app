@@ -1,52 +1,189 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <title>Redirect.app</title>
-<style>body {font-family:sans-serif; max-width:30em; margin:10vmin auto;} input {width:100%;}</style>
+<style>
+
+  :root {
+    --body-color:  #E9E9EB;
+    --background-color:  #fefefe;
+    --image-color:  #f8f8f8;
+    --text-color:  #16161d;
+  }
+  media (prefers-color-scheme: dark) {
+    :root {
+      --body-color: #16161d;
+      --background-color:  #16161d;
+      --image-color:  #f8f8f8;
+      --text-color:  #fafafa;
+    }
+  }
+
+
+  body {
+    font-family:sans-serif; 
+    max-width:345px;
+    margin:10vmin auto;
+    background-color: var(--body-color);
+  }
+
+  input {
+    border:0;
+    background-color: transparent;
+    padding:0 1.5em;
+    flex: 1 1 auto;
+  }
+  input::placeholder {
+    opacity:0.4;
+  }
+  input.thumbnail {
+    
+    
+    max-height:425px;
+    min-width: 100px;
+    min-height:100px;
+  
+    background-color: var(--image-color);
+    padding:0;
+    margin-bottom:1em;
+  }
+  input[name="t"] {
+    font-weight:600;
+    color:black;
+  }
+
+  .column {
+    display:flex;
+    flex-direction:column;
+    flex: 1 1 auto;
+  }
+  .row {
+    display:flex;
+    flex-direction:row;
+  }
+
+  .column div:first-child {
+    flex: 10 1 auto;
+  }
+  form {
+    background-color: var(--background-color);
+    border-radius: 0.3em ;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    padding-bottom:1em;
+
+    background-color: var(--background-color);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.09), 0 6px 6px rgba(0,0,0,0.13);
+  }
+  #container {
+    transform:rotate(-2deg);
+  }
+
+  #favicon {
+    width:64px;
+    height:64px;
+    background-color:var(--image-color);
+    flex: 0 0 auto;
+    margin-right:16px;
+    font-size:0;
+  }
+
+  #rurl {
+    border:0;
+    padding:0.5em 1.5em;
+    font-size:0.8em;
+    color:var(--text-color);
+    font-family:monospace;
+    width:100%;
+    box-sizing:border-box;
+  }
+  </style>
 <script> 
 
-let dashspaces = (s) => s.replace(/ +/g, " ").FormData(/--/g, "—"/*em*/).replace(/-/g, "--").replace(/ -- /g, "_-_").replace(/ /g, "-");
+let dashspaces = (s) => s.replace(/ +/g, " ").replace(/--/g, "—"/*em*/).replace(/-/g, "--").replace(/ -- /g, "_-_").replace(/ /g, "-");
 let spacedashes = (s) => s.replace(/-/g, " ").replace(/  /g, "-").replace(/ -- /g, "_-_").replace(/ /g, "-");
+
+function encodePrettyComponent(s) {
+  let replacements = {' - ': '---', '-': '--', ' ' : '-'}
+  let re = new RegExp('(' + Object.keys(replacements).join('|') + ')', 'g');
+  return encodeURIComponent(s.replace(re, e => replacements[e] ?? '-'))
+    // .replace(/\%2C/g, ",")
+    .replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16));
+}
+
+function metadataToPath(data) {
+  if (!data || !data.title) return "/";
+  let path = ["/" + encodePrettyComponent(data.title)];
+  if (data.description) path.push("d/" + encodePrettyComponent(data.description.substring(0,200).split(". ").shift()));
+  if (data.favicon) path.push("f/" + encodeURIComponent(data.favicon));
+  if (data.image) path.push("i/" + encodeURIComponent(btoa(data.image).replace(/=/g, "")));
+  return path.join('/') + "/";
+}
 
 function parse() {
   let formData = new FormData(document.forms[0]);
-  var object = {};
+  let formObj = Object.fromEntries(formData);
+  console.log("DATA", formObj)
 
+  console.log("object", formObj);
   let url = formData.get("url");
   formData.delete("url")
   let title = formData.get("t");
   formData.delete("t")
 
   if (!title.length) return;
-  console.log("object", object);
-  let path = `/${title.replace(/ /r)}`
+  let path = `/${dashspaces(title)}/`
   let encodedFields = ["i", "v"];
   formData.forEach((value, key) => {
-    if (!value.length) continue;
+    if (!value.length) return;
     if (encodedFields.includes(key)) value = btoa(key)
     path += `/${key}/${value}`
   });
   formData.forEach((value, key) => {if (value.length) object[key] = value});
-
-
-
+  
   path += "#" + url;
   console.log(path);
-  history.replaceState(null, path, path);
+  document.getElementById("rurl").value = `https://redirect.app${path}`;
+  // history.replaceState(null, path, path);
 }
+
+function getURL(el) {
+  let url = prompt("Choose an emoji, image URL or SVG code");
+  console.log(document.forms.t, el);
+  let thumbnail = document.forms[0].t;
+  
+  if (url) {
+    el.src = url;
+    console.log("el", el.form)
+    el.form.elements[el.getAttribute("target")].value = url;
+  } 
+  parse();
+}
+var focusedElement;
+function selectElement(el) {
+  // if (focusedElement == el) return;
+  focusedElement = el;
+  setTimeout(function () { el.setSelectionRange(0, el.value.length) }, 10);
+    
+}
+
 </script>
+
+<div id="container">
 <form id="form" onsubmit="parse(); return false;">
-  <label for="url">Link URL</label><br>
-  <input name="url" oninput="parse()"><p>
-  <label for="t">Title</label><br>
-  <input name="t" oninput="parse()"><p>
-  <label for="d">Description</label><br>
-  <input name="d" oninput="parse()"><p>
-  <label for="i">Image URL</label><br>
-  <input name="i" oninput="parse()"><p>
-  <label for="f">Favicon/Emoji</label><br>
-  <input name="f" oninput="parse()"><p>
-  <button type="sumbit" style="display:none">submit</button>
+  <input type="image" target="i" class="thumbnail" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
+  <div class="row">
+    <div class="column">
+      <input name="t" oninput="parse()" placeholder="Title">
+      <input name="d" oninput="parse()" placeholder="Description">
+      <input id="i" name="i" type="hidden" oninput="parse()">
+      <input id="f" name="i" type="hidden" oninput="parse()">
+      <input name="url" oninput="parse()" placeholder="example.com">
+      <button type="sumbit" style="display:none">submit</button>
+    </div>
+    <input type="image" src="" id="favicon" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
+  </div>
   
 </form>
-
-
+<input type="text" id="rurl" onclick="selectElement(this)" value="https://redirect.app/">
+</div>
