@@ -84,6 +84,11 @@ export default async (request, context) => {
             content.push(`<link rel="icon" type="image/png" href="https://fonts.gstatic.com/s/e/notoemoji/14.0/${codepoints.join("_")}/128.png">`);
           }
         }
+
+        if (info.u) {
+          info.u = decodeURL(info.u)
+          content.push(mProp("og:url", info.u));
+        }
         // content.push(mProp("og:url", request.url)`);
         content.push(`<script>l=location;l.href=l.hash.substring(1)||'//www.'+l.host</script>`);
         console.log(["Metadata Request", JSON.stringify(info), geo, ua].join('\t')); 
