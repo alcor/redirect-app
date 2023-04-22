@@ -30,6 +30,7 @@ function mName(name, content) { return `<meta name="${name}" content="${content}
 
 // Valid URL Chars A-Za-z0-9-._~:?@!$&()*;=+/
 export default async (request, context) => {
+
   try {
     const ua = request.headers.get("user-agent");
     let url = new URL(request.url);
@@ -41,11 +42,17 @@ export default async (request, context) => {
     if (uaMatch) { return new Response('', { status: 401 }); }
     
     if (path != "/" ) {
-      let username = url.username
+      
       let metadataBots = [ "Twitterbot", "curl", "facebookexternalhit", "Slackbot-LinkExpanding", "Discordbot", "snapchat", "Googlebot"]
-      let isMetadataBot = metadataBots.some(bot => ua?.indexOf(bot) != -1) || username == "md";
+      let isMetadataBot = metadataBots.some(bot => ua?.indexOf(bot) != -1);
 
+      if (path.startsWith("/m/")) {
+        path = path.substring(2);
+        isMetadataBot = true;
+      }
+      
       if (isMetadataBot && path.endsWith("/")) {
+        console.log("parsing", path)
         let info = pathToMetadata(path)
 
         let content = ['<meta charset="UTF-8">'];
@@ -78,7 +85,7 @@ export default async (request, context) => {
           }
         }
         // content.push(mProp("og:url", request.url)`);
-        
+        content.push(`<script>l=location;l.href=l.hash.substring(1)||'//www.'+l.host</script>`);
         console.log(["Metadata Request", JSON.stringify(info), geo, ua].join('\t')); 
         return new Response(content.join("\n"), {
           headers: { "content-type": "text/html" },
