@@ -76,15 +76,18 @@ export default async (request, context) => {
           if (info.vh) content.push(mProp("og:image:width", info.vh)); 
         } 
         if (info.f) { // Favicon: URL Encoded
-          if (info.f.length > 9){
-            info.f = decodeURL(info.f);
-            content.push(`<link rel="icon" type="image/png" href="${info.f}">`);
+          if (info.f.length > 9){      
+            content.push(`<link rel="icon" type="image/png" href="${decodeURL(info.f)}">`);
           } else {
             let codepoints = Array.from(info.f).map(c => c.codePointAt(0).toString(16));
             content.push(`<link rel="icon" type="image/png" href="https://fonts.gstatic.com/s/e/notoemoji/14.0/${codepoints.join("_")}/128.png">`);
           }
         }
 
+        if (info.u) {
+          info.u = decodeURL(info.u)
+          content.push(mProp("og:url", info.u));
+        }
         if (info.u) {
           info.u = decodeURL(info.u)
           content.push(mProp("og:url", info.u));

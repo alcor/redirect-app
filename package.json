@@ -23,5 +23,8 @@
   "dependencies": {
     "netlify": "^13.1.2",
     "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "netlify-cli": "^14.3.1"
   }
 }

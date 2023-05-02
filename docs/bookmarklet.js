@@ -18,7 +18,7 @@
     let path = ["/" + encodePrettyComponent(data.title)];
     if (data.description) path.push("d/" + encodePrettyComponent(data.description.substring(0,200).split(". ").shift()));
     if (data.favicon) path.push("f/" + encodeURIComponent(data.favicon));
-    if (data.url) path.push("u/" + encodeURIComponent(data.url));
+    if (data.url) path.push("u/" + encodeURIComponent(btoa(data.url).replace(/=/g, "")));
     if (data.image) path.push("i/" + encodeURIComponent(btoa(data.image).replace(/=/g, "")));
     return path.join('/') + "/";
   }

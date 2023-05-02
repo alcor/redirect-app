@@ -8,6 +8,8 @@
     --background-color:  #fefefe;
     --image-color:  #f8f8f8;
     --text-color:  #16161d;
+    --body-color: var(--arc-palette-background);
+    --text-color: var(--arc-palette-title)
   }
   media (prefers-color-scheme: dark) {
     :root {
@@ -17,7 +19,6 @@
       --text-color:  #fafafa;
     }
   }
-
 
   body {
     font-family:sans-serif; 
@@ -31,6 +32,8 @@
     background-color: transparent;
     padding:0 1.5em;
     flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   input::placeholder {
     opacity:0.4;
@@ -88,7 +91,7 @@
     font-size:0;
   }
 
-  #rurl {
+  #rurl, #linkbot {
     border:0;
     padding:0.5em 1.5em;
     font-size:0.8em;
@@ -117,7 +120,44 @@ function metadataToPath(data) {
   if (data.description) path.push("d/" + encodePrettyComponent(data.description.substring(0,200).split(". ").shift()));
   if (data.favicon) path.push("f/" + encodeURIComponent(data.favicon));
   if (data.image) path.push("i/" + encodeURIComponent(btoa(data.image).replace(/=/g, "")));
-  return path.join('/') + "/";
+  return "/m" + path.join('/') + "/";
+}
+
+	
+function cleanURL(url) {
+  if (!url.startsWith("http")) url = "https://" + url;
+  return url;
+}
+
+async function fetchMetadata() {
+  let url = document.getElementById("url").value;
+  if (!url) return;
+  let metadata = await propogateData(url);
+
+
+  if (metadata.title) document.getElementById("t").value = metadata.title;
+  if (metadata.descirption) document.getElementById("d").value = metadata.description;
+  if (metadata.image) document.getElementById("i").value = metadata.image;
+  if (metadata.image) document.getElementById("thumbnail").src = metadata.image;
+  if (metadata.site_name) document.getElementById("s").value = metadata.site_name;
+  if (metadata.url) document.getElementById("url").value = metadata.url;
+  parse();
+}
+
+async function propogateData(site) {
+  console.log("fetching data for", site, "...")
+  const url = `https://opengraph.io/api/1.1/site/${encodeURIComponent(cleanURL(site))}?use_proxy=true&app_id=02833a69-1109-4770-ac9e-b1abface4369`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log(data);
+    return data.hybridGraph;
+  } catch (error) {
+    console.error(error);
+  }
+
+  return data;
 }
 
 function parse() {
@@ -132,18 +172,18 @@ function parse() {
   formData.delete("t")
 
   if (!title.length) return;
-  let path = `/${dashspaces(title)}/`
+  let path = `/${dashspaces(title)}`
   let encodedFields = ["i", "v"];
   formData.forEach((value, key) => {
     if (!value.length) return;
-    if (encodedFields.includes(key)) value = btoa(key)
+    if (encodedFields.includes(key)) value = btoa(value)
     path += `/${key}/${value}`
   });
-  formData.forEach((value, key) => {if (value.length) object[key] = value});
+  // formData.forEach((value, key) => {if (value.length) object[key] = value});
   
-  path += "#" + url;
+  path += "/#" + url;
   console.log(path);
-  document.getElementById("rurl").value = `https://redirect.app${path}`;
+  document.getElementById("rurl").value = `https://redirect.app/m${path}`;
   // history.replaceState(null, path, path);
 }
 
@@ -171,19 +211,22 @@ function selectElement(el) {
 
 <div id="container">
 <form id="form" onsubmit="parse(); return false;">
-  <input type="image" target="i" class="thumbnail" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
+  <input id="thumbnail" type="image" target="i" class="thumbnail" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
   <div class="row">
     <div class="column">
-      <input name="t" oninput="parse()" placeholder="Title">
-      <input name="d" oninput="parse()" placeholder="Description">
+      <input id="t" name="t" oninput="parse()" placeholder="Title">
+      <input id="d" name="d" oninput="parse()" placeholder="Description">
       <input id="i" name="i" type="hidden" oninput="parse()">
       <input id="f" name="i" type="hidden" oninput="parse()">
-      <input name="url" oninput="parse()" placeholder="example.com">
+      <input id="s" name="s" type="hidden" oninput="parse()">
+      <input id="url" name="url" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="example.com">
+      
       <button type="sumbit" style="display:none">submit</button>
     </div>
-    <input type="image" src="" id="favicon" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
+    <input type="image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A" id="favicon" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
   </div>
   
 </form>
 <input type="text" id="rurl" onclick="selectElement(this)" value="https://redirect.app/">
+<input type="text" id="linkbot" onclick="selectElement(this)" value="/embed url:">
 </div>
