@@ -87,13 +87,11 @@ export default async (request, context) => {
         if (info.u) {
           info.u = decodeURL(info.u)
           content.push(mProp("og:url", info.u));
-        }
-        if (info.u) {
-          info.u = decodeURL(info.u)
-          content.push(mProp("og:url", info.u));
+          content.push(`<script>location.href="${info.u}"</script>`);
+        } else {
+          content.push(`<script>l=location;l.href=l.hash.substring(1)||'//www.'+l.host</script>`);
         }
         // content.push(mProp("og:url", request.url)`);
-        content.push(`<script>l=location;l.href=l.hash.substring(1)||'//www.'+l.host</script>`);
         console.log(["Metadata Request", JSON.stringify(info), geo, ua].join('\t')); 
         return new Response(content.join("\n"), {
           headers: { "content-type": "text/html" },

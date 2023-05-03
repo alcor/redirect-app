@@ -13,13 +13,11 @@ const handler = async (event) => {
     return { statusCode: 500, body: error.toString() }
   }
 }
-
 module.exports = { handler }
 
 
 let handleInteraction = (event) => {
   const PUBLIC_KEY = '0e8ab4ac84290450f737c1aeba53bf5fe2640a2ce5ab2f540ee9294d91833ee2';
-
   const signature = event.headers['x-signature-ed25519'];
   const timestamp = event.headers['x-signature-timestamp'];
   const isVerified = tweetnacl.sign.detached.verify(
@@ -31,7 +29,7 @@ let handleInteraction = (event) => {
   let headers = {'Content-Type': 'application/json'}; 
   
   if (!isVerified) {
-    console.log("> invalid request signature")
+    console.debug("Invalid request signature")
     return {statusCode: 401, headers, body: JSON.stringify({"type": 1})}
   } else {
     let json = JSON.parse(event.body);
@@ -46,8 +44,6 @@ let handleCommand = (event, json) => {
   let user = json.user;
   let action = json.data.name;
   let options = Object.fromEntries(json.data.options.map(o => [o.name, o.value]));
-
-  console.log("Interaction: ", JSON.stringify(json))
   let url = options.url
   if (!url.includes(":")) url = "https://" + options.url
 
@@ -56,7 +52,6 @@ let handleCommand = (event, json) => {
   if (title.length > 28) title = title.substring(0, 28) + "..."
   
   let description = options.description
-
   let reply = {type: 4}
 
   let embed = description?.length > 0 || action == "embed";  
@@ -88,17 +83,17 @@ let handleCommand = (event, json) => {
         if (options.fields.length) content.fields = Object.entries(dict).map(([name, value]) => ({name, value, "inline":true}))
       } catch (e) {console.log("Field error", e, `{${options.fields}}`)}
     }
-  
 
     reply.data = {embeds:[content]}
+
   } else {
+
     reply.data = {content: `__[${title}](${url})__`};
+
   }
   
-  
-  
   reply = JSON.stringify(reply)
-  console.log("REPLY", reply);
+  console.debug("Response: ", reply);
   let headers = {'Content-Type': 'application/json'}; 
   return  {statusCode: 200, headers, body: reply}
 }

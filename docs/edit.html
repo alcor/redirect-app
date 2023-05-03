@@ -21,11 +21,25 @@
   }
 
   body {
-    font-family:sans-serif; 
     max-width:345px;
     margin:10vmin auto;
     background-color: var(--body-color);
+
   }
+
+  body, input, textarea {
+    font-family:sans-serif;
+
+  }
+
+  textarea {
+      resize: none;
+      border:0;
+    background-color: transparent;
+    padding:.5em;
+    flex: 1 1 auto;
+    margin:0 0.5em;
+    }
 
   input {
     border:0;
@@ -39,19 +53,24 @@
     opacity:0.4;
   }
   input.thumbnail {
-    
-    
     max-height:425px;
     min-width: 100px;
     min-height:100px;
-  
     background-color: var(--image-color);
     padding:0;
-    margin-bottom:1em;
+    margin-bottom:0.5em;
   }
-  input[name="t"] {
+
+  textarea[name="t"] {
     font-weight:600;
     color:black;
+  }
+
+  textarea[name="d"] {
+
+  }
+  textarea[name="url"] {
+    opacity:0.5;
   }
 
   .column {
@@ -100,8 +119,16 @@
     width:100%;
     box-sizing:border-box;
   }
+  #fetch {
+    opacity:0.1;
+    cursor:pointer;
+  }
+  #fetch:hover {
+    opacity:1
+  }
+
   </style>
-<script> 
+<script>
 
 let dashspaces = (s) => s.replace(/ +/g, " ").replace(/--/g, "—"/*em*/).replace(/-/g, "--").replace(/ -- /g, "_-_").replace(/ /g, "-");
 let spacedashes = (s) => s.replace(/-/g, " ").replace(/  /g, "-").replace(/ -- /g, "_-_").replace(/ /g, "-");
@@ -123,7 +150,7 @@ function metadataToPath(data) {
   return "/m" + path.join('/') + "/";
 }
 
-	
+
 function cleanURL(url) {
   if (!url.startsWith("http")) url = "https://" + url;
   return url;
@@ -135,8 +162,9 @@ async function fetchMetadata() {
   let metadata = await propogateData(url);
 
 
+  console.log("metadata", metadata)
   if (metadata.title) document.getElementById("t").value = metadata.title;
-  if (metadata.descirption) document.getElementById("d").value = metadata.description;
+  if (metadata.description) document.getElementById("d").value = metadata.description;
   if (metadata.image) document.getElementById("i").value = metadata.image;
   if (metadata.image) document.getElementById("thumbnail").src = metadata.image;
   if (metadata.site_name) document.getElementById("s").value = metadata.site_name;
@@ -147,7 +175,7 @@ async function fetchMetadata() {
 async function propogateData(site) {
   console.log("fetching data for", site, "...")
   const url = `https://opengraph.io/api/1.1/site/${encodeURIComponent(cleanURL(site))}?use_proxy=true&app_id=02833a69-1109-4770-ac9e-b1abface4369`;
-  
+
   try {
     const response = await fetch(url);
     const data = await response.json();
@@ -159,11 +187,36 @@ async function propogateData(site) {
 
   return data;
 }
+function load() {
+  let data = localStorage.getItem("data");
+  if (data) {
+    data = JSON.parse(data)
+    console.log("Restoring", data)
+    let form = document.forms[0];
+    for (let key in data) {
+      form[key].value = data[key];
+      if (!data[key].length) continue;
+      if (key == "i") document.getElementById("thumbnail").src = imageToURL(data[key]);
+      if (key == "f") document.getElementById("favicon").src = imageToURL(data[key]);
+      console.log("key", key, data[key], form[key])
+    }
+    parse();
+  }
+}
+
+function adjustHeight(el) {  /* javascript */
+  el.style.height = "1px";
+  el.style.height = (el.scrollHeight)+"px";
+}
 
 function parse() {
-  let formData = new FormData(document.forms[0]);
+  let form = document.forms[0]
+
+  let formData = new FormData(form);
+  console.log("formdata", formData.keys)
   let formObj = Object.fromEntries(formData);
   console.log("DATA", formObj)
+  localStorage.setItem("data", JSON.stringify(formObj));
 
   console.log("object", formObj);
   let url = formData.get("url");
@@ -172,31 +225,60 @@ function parse() {
   formData.delete("t")
 
   if (!title.length) return;
-  let path = `/${dashspaces(title)}`
+  let path = `/${encodePrettyComponent(title)}`
   let encodedFields = ["i", "v"];
   formData.forEach((value, key) => {
     if (!value.length) return;
-    if (encodedFields.includes(key)) value = btoa(value)
+    if (encodedFields.includes(key)) {
+      value = btoa(value)
+    } else {
+      value = encodePrettyComponent(value)
+    }
     path += `/${key}/${value}`
   });
-  // formData.forEach((value, key) => {if (value.length) object[key] = value});
   
-  path += "/#" + url;
+  // formData.forEach((value, key) => {if (value.length) object[key] = value});
+
+  let hash = false;
+  if (hash) {
+    path += "/#" + url;
+  } else {
+    path += "/u/" + encodeURIComponent(url) + "/";
+  }
+  
+
   console.log(path);
   document.getElementById("rurl").value = `https://redirect.app/m${path}`;
-  // history.replaceState(null, path, path);
+
+  let linkbot = `/embed url:${url} title:${title}`;
+  if (formObj.d.length) linkbot += ` description:${formObj.d}`;
+  if (formObj.i.length) linkbot += ` image:${formObj.i}`;
+
+  document.getElementById("linkbot").value = linkbot;
+  // history.replaceState(null, null, "edit" + path);
+
+    
+  Array.from(document.querySelectorAll("textarea")).forEach((el) => {
+    console.log("el", el)
+    adjustHeight(el);
+  })
 }
 
+function imageToURL(img) {
+  if (img.startsWith("http")) return img;
+  let codepoints = Array.from(img).map(c => c.codePointAt(0).toString(16));
+  return `https://fonts.gstatic.com/s/e/notoemoji/14.0/${codepoints.join("_")}/128.png`
+}
 function getURL(el) {
   let url = prompt("Choose an emoji, image URL or SVG code");
   console.log(document.forms.t, el);
   let thumbnail = document.forms[0].t;
-  
+
   if (url) {
-    el.src = url;
+    el.src = imageToURL(url);
     console.log("el", el.form)
     el.form.elements[el.getAttribute("target")].value = url;
-  } 
+  }
   parse();
 }
 var focusedElement;
@@ -204,7 +286,7 @@ function selectElement(el) {
   // if (focusedElement == el) return;
   focusedElement = el;
   setTimeout(function () { el.setSelectionRange(0, el.value.length) }, 10);
-    
+
 }
 
 </script>
@@ -214,19 +296,25 @@ function selectElement(el) {
   <input id="thumbnail" type="image" target="i" class="thumbnail" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
   <div class="row">
     <div class="column">
-      <input id="t" name="t" oninput="parse()" placeholder="Title">
-      <input id="d" name="d" oninput="parse()" placeholder="Description">
-      <input id="i" name="i" type="hidden" oninput="parse()">
-      <input id="f" name="i" type="hidden" oninput="parse()">
+      <textarea id="t" name="t" oninput="parse()" placeholder="Title"></textarea>
+      <textarea id="d" name="d" oninput="parse()" placeholder="Description"></textarea>
       <input id="s" name="s" type="hidden" oninput="parse()">
-      <input id="url" name="url" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="example.com">
-      
+      <input id="i" name="i" type="hidden" oninput="parse()">
+      <input id="f" name="f" type="hidden" oninput="parse()">
+      <div class="row">
+      <textarea id="url" name="url" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="example.com"></textarea>
+      <div id="fetch" onclick="fetchMetadata()">↧</div>
+      </div>
       <button type="sumbit" style="display:none">submit</button>
     </div>
     <input type="image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A" id="favicon" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
   </div>
-  
+
 </form>
-<input type="text" id="rurl" onclick="selectElement(this)" value="https://redirect.app/">
-<input type="text" id="linkbot" onclick="selectElement(this)" value="/embed url:">
+<textarea type="text" id="rurl" onclick="selectElement(this)" value="https://redirect.app/"></textarea>
+<textarea type="text" id="linkbot" onclick="selectElement(this)" value="/embed url:"></textarea>
 </div>
+<script>
+  load();
+
+</script>
