@@ -27,9 +27,9 @@
   data.title = document.querySelector('meta[property="og:title"]').content
   data.image = document.querySelector('meta[property="og:image"]').content
   data.description = document.querySelector('meta[property="og:description"]').content
-  data.url = document.querySelector('meta[property="og:url"]').content
+  data.url = document.querySelector('meta[property="og:url"]').content || location.href
   // data.favicon = document.querySelector('link[rel="icon"]').href
-  let url = "https://redirect.app/m" + metadataToPath(data) + "#" + location.href
+  let url = "https://redirect.app/edit" + metadataToPath(data) + "#" + location.href
   
   console.log("Path", url)
 

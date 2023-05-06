@@ -8,8 +8,22 @@
     --background-color:  #fefefe;
     --image-color:  #f8f8f8;
     --text-color:  #16161d;
-    --body-color: var(--arc-palette-background);
+    --body-color: var(--arc-palette-backgroundExtra);
     --text-color: var(--arc-palette-title)
+  }
+  :root {
+  /* --shadow-color: var(--arc-palette-title); */
+  --shadow-color: var(--arc-palette-background);
+    --shadow-elevation-low:
+      0px 1px 1.1px var(--shadow-color),
+      0.1px 1.7px 1.9px -1.2px var(--shadow-color),
+      0.2px 4px 4.5px -2.5px var(--shadow-color);
+    --shadow-elevation-medium:
+      0px 1px 1.1px var(--shadow-color),
+      0.1px 3.3px 3.7px -0.8px var(--shadow-color),
+      0.4px 8.2px 9.2px -1.7px var(--shadow-color),
+      0.9px 20px 22.5px -2.5px var(--shadow-color);
+
   }
   media (prefers-color-scheme: dark) {
     :root {
@@ -69,7 +83,7 @@
   textarea[name="d"] {
 
   }
-  textarea[name="url"] {
+  textarea[name="u"] {
     opacity:0.5;
   }
 
@@ -95,7 +109,7 @@
     padding-bottom:1em;
 
     background-color: var(--background-color);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.09), 0 6px 6px rgba(0,0,0,0.13);
+    box-shadow: var(--shadow-elevation-medium);
   }
   #container {
     transform:rotate(-2deg);
@@ -106,8 +120,10 @@
     height:64px;
     background-color:var(--image-color);
     flex: 0 0 auto;
-    margin-right:16px;
+    margin-right:12px;
+    margin-top:4px;
     font-size:0;
+    border-radius:4px;
   }
 
   #rurl, #linkbot {
@@ -141,6 +157,18 @@ function encodePrettyComponent(s) {
     .replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16));
 }
 
+function decodePrettyComponent(s) {
+  let replacements = {'---': ' - ', '--': '-','-' : ' '}
+  return decodeURIComponent(s.replace(/-+/g, e => replacements[e] ?? '-'))
+}
+
+function decodeURL(s) {
+  s = decodeURIComponent(s)
+  if (s.startsWith("http")) s;
+  return atob(s.replace(/=/g,''));
+}
+
+
 function metadataToPath(data) {
   if (!data || !data.title) return "/";
   let path = ["/" + encodePrettyComponent(data.title)];
@@ -150,6 +178,22 @@ function metadataToPath(data) {
   return "/m" + path.join('/') + "/";
 }
 
+function pathToMetadata(path) {
+  let components = path.substring(1).split("/");
+  let info = {t: decodePrettyComponent(components.shift())}
+  for (let i = 0; i < components.length; i+=2) {
+    let key = components[i];
+    let value = components[i+1];
+    if (!value) continue;
+    if (key == "d") { value = decodePrettyComponent(value); }
+    if (key == "u" || key == "i") { value = decodeURL(value); }
+    else if (value.includes("%")) { value = decodeURIComponent(value); }
+    if (key.length && value.length) info[key] = value;
+  }
+  return info;
+}
+
+
 
 function cleanURL(url) {
   if (!url.startsWith("http")) url = "https://" + url;
@@ -157,7 +201,7 @@ function cleanURL(url) {
 }
 
 async function fetchMetadata() {
-  let url = document.getElementById("url").value;
+  let url = document.getElementById("u").value;
   if (!url) return;
   let metadata = await propogateData(url);
 
@@ -168,7 +212,7 @@ async function fetchMetadata() {
   if (metadata.image) document.getElementById("i").value = metadata.image;
   if (metadata.image) document.getElementById("thumbnail").src = metadata.image;
   if (metadata.site_name) document.getElementById("s").value = metadata.site_name;
-  if (metadata.url) document.getElementById("url").value = metadata.url;
+  if (metadata.url) document.getElementById("u").value = metadata.url;
   parse();
 }
 
@@ -188,12 +232,20 @@ async function propogateData(site) {
   return data;
 }
 function load() {
+  console.log(location)
   let data = localStorage.getItem("data");
+  if (location.pathname.length > 5) {
+    let path = location.pathname.substring(5);
+    data = pathToMetadata(path);
+  } else if (data) {
+    data = JSON.parse(data)    
+  }
+  
   if (data) {
-    data = JSON.parse(data)
     console.log("Restoring", data)
     let form = document.forms[0];
     for (let key in data) {
+      console.log("key", key);
       form[key].value = data[key];
       if (!data[key].length) continue;
       if (key == "i") document.getElementById("thumbnail").src = imageToURL(data[key]);
@@ -219,44 +271,44 @@ function parse() {
   localStorage.setItem("data", JSON.stringify(formObj));
 
   console.log("object", formObj);
-  let url = formData.get("url");
-  formData.delete("url")
+  let url = formData.get("u");
+  formData.delete("u")
   let title = formData.get("t");
   formData.delete("t")
 
-  if (!title.length) return;
-  let path = `/${encodePrettyComponent(title)}`
-  let encodedFields = ["i", "v"];
-  formData.forEach((value, key) => {
-    if (!value.length) return;
-    if (encodedFields.includes(key)) {
-      value = btoa(value)
+  if (title) {
+    let path = `/${encodePrettyComponent(title)}`
+    let encodedFields = ["i", "v"];
+    formData.forEach((value, key) => {
+      if (!value.length) return;
+      if (encodedFields.includes(key)) {
+        value = btoa(value)
+      } else {
+        value = encodePrettyComponent(value)
+      }
+      path += `/${key}/${value}`
+    });
+    
+    // formData.forEach((value, key) => {if (value.length) object[key] = value});
+
+    let hash = false;
+    if (hash) {
+      path += "/#" + url;
     } else {
-      value = encodePrettyComponent(value)
+      path += "/u/" + encodeURIComponent(url) + "/";
     }
-    path += `/${key}/${value}`
-  });
-  
-  // formData.forEach((value, key) => {if (value.length) object[key] = value});
+    
 
-  let hash = false;
-  if (hash) {
-    path += "/#" + url;
-  } else {
-    path += "/u/" + encodeURIComponent(url) + "/";
+    console.log(path);
+    document.getElementById("rurl").value = `https://redirect.app/m${path}`;
+
+    let linkbot = `/embed url:${url} title:${title}`;
+    if (formObj.d.length) linkbot += ` description:${formObj.d}`;
+    if (formObj.i.length) linkbot += ` image:${formObj.i}`;
+
+    document.getElementById("linkbot").value = linkbot;
+    // history.replaceState(null, null, "edit" + path);
   }
-  
-
-  console.log(path);
-  document.getElementById("rurl").value = `https://redirect.app/m${path}`;
-
-  let linkbot = `/embed url:${url} title:${title}`;
-  if (formObj.d.length) linkbot += ` description:${formObj.d}`;
-  if (formObj.i.length) linkbot += ` image:${formObj.i}`;
-
-  document.getElementById("linkbot").value = linkbot;
-  // history.replaceState(null, null, "edit" + path);
-
     
   Array.from(document.querySelectorAll("textarea")).forEach((el) => {
     console.log("el", el)
@@ -302,7 +354,7 @@ function selectElement(el) {
       <input id="i" name="i" type="hidden" oninput="parse()">
       <input id="f" name="f" type="hidden" oninput="parse()">
       <div class="row">
-      <textarea id="url" name="url" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="example.com"></textarea>
+      <textarea id="u" name="u" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="example.com"></textarea>
       <div id="fetch" onclick="fetchMetadata()">↧</div>
       </div>
       <button type="sumbit" style="display:none">submit</button>
