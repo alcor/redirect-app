@@ -8,12 +8,12 @@
     --background-color:  #fefefe;
     --image-color:  #f8f8f8;
     --text-color:  #16161d;
-    --body-color: var(--arc-palette-backgroundExtra);
-    --text-color: var(--arc-palette-title)
+    --body-color: var(--xarc-background-simple-color, #E9E9EB);
+    --text-color: var(--xarc-palette-title, #16161d);
   }
   :root {
   /* --shadow-color: var(--arc-palette-title); */
-  --shadow-color: var(--arc-palette-background);
+  --shadow-color: var(--xarc-palette-background, #c6c6c6);
     --shadow-elevation-low:
       0px 1px 1.1px var(--shadow-color),
       0.1px 1.7px 1.9px -1.2px var(--shadow-color),
@@ -25,14 +25,14 @@
       0.9px 20px 22.5px -2.5px var(--shadow-color);
 
   }
-  media (prefers-color-scheme: dark) {
+  /* media (prefers-color-scheme: dark) {
     :root {
       --body-color: #16161d;
       --background-color:  #16161d;
       --image-color:  #f8f8f8;
       --text-color:  #fafafa;
     }
-  }
+  } */
 
   body {
     max-width:345px;
@@ -66,7 +66,7 @@
   input::placeholder {
     opacity:0.4;
   }
-  input.thumbnail {
+  input.i_preview {
     max-height:425px;
     min-width: 100px;
     min-height:100px;
@@ -115,7 +115,7 @@
     transform:rotate(-2deg);
   }
 
-  #favicon {
+  #f_preview {
     width:64px;
     height:64px;
     background-color:var(--image-color);
@@ -161,7 +161,9 @@ function decodePrettyComponent(s) {
   let replacements = {'---': ' - ', '--': '-','-' : ' '}
   return decodeURIComponent(s.replace(/-+/g, e => replacements[e] ?? '-'))
 }
-
+function encodeURL(u) {
+  return encodeURIComponent(u).replace(/^https%3A%2F%2F/, "")
+}
 function decodeURL(s) {
   s = decodeURIComponent(s)
   if (s.startsWith("http")) s;
@@ -209,8 +211,12 @@ async function fetchMetadata() {
   console.log("metadata", metadata)
   if (metadata.title) document.getElementById("t").value = metadata.title;
   if (metadata.description) document.getElementById("d").value = metadata.description;
+  if (metadata.imageSecureUrl) metadata.image = metadata.imageSecureUrl;
   if (metadata.image) document.getElementById("i").value = metadata.image;
-  if (metadata.image) document.getElementById("thumbnail").src = metadata.image;
+  if (metadata.image) document.getElementById("i_preview").src = metadata.image;
+
+  if (metadata.favicon) document.getElementById("f").value = metadata.favicon;
+  if (metadata.favicon) document.getElementById("f_preview").src = metadata.favicon;
   if (metadata.site_name) document.getElementById("s").value = metadata.site_name;
   if (metadata.url) document.getElementById("u").value = metadata.url;
   parse();
@@ -248,8 +254,8 @@ function load() {
       console.log("key", key);
       form[key].value = data[key];
       if (!data[key].length) continue;
-      if (key == "i") document.getElementById("thumbnail").src = imageToURL(data[key]);
-      if (key == "f") document.getElementById("favicon").src = imageToURL(data[key]);
+      if (key == "i") document.getElementById("i_preview").src = imageToURL(data[key]);
+      if (key == "f") document.getElementById("f_preview").src = imageToURL(data[key]);
       console.log("key", key, data[key], form[key])
     }
     parse();
@@ -278,11 +284,11 @@ function parse() {
 
   if (title) {
     let path = `/${encodePrettyComponent(title)}`
-    let encodedFields = ["i", "v"];
+    let encodedFields = ["i", "v", "f"];
     formData.forEach((value, key) => {
       if (!value.length) return;
       if (encodedFields.includes(key)) {
-        value = btoa(value)
+        value = encodeURL(value)
       } else {
         value = encodePrettyComponent(value)
       }
@@ -295,12 +301,16 @@ function parse() {
     if (hash) {
       path += "/#" + url;
     } else {
-      path += "/u/" + encodeURIComponent(url) + "/";
+      path += "/u/" + encodeURL(url) + "/";
     }
     
 
     console.log(path);
-    document.getElementById("rurl").value = `https://redirect.app/m${path}`;
+    
+
+    let prefix = new URL(url).hostname.replace("www.", "").replace(".com","").replace(".", "-") + ".";
+    origin = `https://${prefix}redirect.app`
+    document.getElementById("rurl").value = `${origin}/m${path}`;
 
     let linkbot = `/embed url:${url} title:${title}`;
     if (formObj.d.length) linkbot += ` description:${formObj.d}`;
@@ -324,7 +334,7 @@ function imageToURL(img) {
 function getURL(el) {
   let url = prompt("Choose an emoji, image URL or SVG code");
   console.log(document.forms.t, el);
-  let thumbnail = document.forms[0].t;
+  
 
   if (url) {
     el.src = imageToURL(url);
@@ -345,7 +355,7 @@ function selectElement(el) {
 
 <div id="container">
 <form id="form" onsubmit="parse(); return false;">
-  <input id="thumbnail" type="image" target="i" class="thumbnail" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
+  <input id="i_preview" type="image" target="i" class="i_preview" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
   <div class="row">
     <div class="column">
       <textarea id="t" name="t" oninput="parse()" placeholder="Title"></textarea>
@@ -359,7 +369,7 @@ function selectElement(el) {
       </div>
       <button type="sumbit" style="display:none">submit</button>
     </div>
-    <input type="image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A" id="favicon" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
+    <input type="image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A" id="f_preview" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
   </div>
 
 </form>
