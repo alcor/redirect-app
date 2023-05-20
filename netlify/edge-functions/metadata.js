@@ -78,7 +78,7 @@ export default async (request, context) => {
           info.u = decodeURL(info.u)
           if (!info.u.startsWith("http")) info.u = "https://" + info.u;
           content.push(mProp("og:url", info.u));
-          // content.push(`<script>location.href="${info.u}"</script>`);
+          content.push(`<script>location.href="${info.u}"</script>`);
         } else {
           // content.push(`<script>l=location;l.href=l.hash.substring(1)||'//www.'+l.host</script>`);
         }
