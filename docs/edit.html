@@ -8,12 +8,12 @@
     --background-color:  #fefefe;
     --image-color:  #f8f8f8;
     --text-color:  #16161d;
-    --body-color: var(--xarc-background-simple-color, #E9E9EB);
-    --text-color: var(--xarc-palette-title, #16161d);
+    --body-color: var(--arc-background-simple-color, #E9E9EB);
+    --text-color: var(--arc-palette-title, #16161d);
   }
   :root {
   /* --shadow-color: var(--arc-palette-title); */
-  --shadow-color: var(--xarc-palette-background, #c6c6c6);
+  --shadow-color: rgba(0,0,0,0.1);
     --shadow-elevation-low:
       0px 1px 1.1px var(--shadow-color),
       0.1px 1.7px 1.9px -1.2px var(--shadow-color),
@@ -38,7 +38,14 @@
     max-width:345px;
     margin:10vmin auto;
     background-color: var(--body-color);
-
+  }
+  #arc-theme {
+    background:
+    linear-gradient(0deg, var(--arc-background-gradient-overlay-color1) 0%, transparent 100%),
+    linear-gradient(90deg, var(--arc-background-gradient-color0) 0%, var(--arc-background-gradient-color1) 100%);
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  opacity:0.5
   }
 
   body, input, textarea {
@@ -352,7 +359,7 @@ function selectElement(el) {
 }
 
 </script>
-
+<div id="arc-theme"></div>
 <div id="container">
 <form id="form" onsubmit="parse(); return false;">
   <input id="i_preview" type="image" target="i" class="i_preview" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
