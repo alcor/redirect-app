@@ -214,8 +214,6 @@
 
     #switcher {
       margin-top:1em;
-      flex-direction:row !important;
-
     }
     #switcher .mode {
       margin-right:1em;
@@ -312,8 +310,10 @@
     cursor: pointer;
     min-width:200px;
     display:flex;
-    flex-direction:column;
-    justify-content:flex-start;
+    flex-direction:row;
+    justify-content:flex-end;
+    margin-bottom:2em;
+    margin-top:0.5em;
   }
   .mode {
     display: block;
@@ -322,6 +322,7 @@
     color:transparent;
     font-size:24px;
     opacity:0.3;
+    margin-left:0.5em;
   }
 
   .mode:hover {
@@ -588,10 +589,10 @@ function setMode(el) {
 <body class="general">
 <div id="arc-theme"></div>
 <div id="container">
-  <h1>make a redirect ↗</h1>
   <form id="form" onsubmit="parse(); return false;">
     
       <div class="column" id="urlcolumn">
+        <h1>make a redirect ↗</h1>
         <div class="row">
           <textarea id="u" name="u" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="paste a url..."></textarea>
           <div id="fetch" onclick="fetchMetadata()">↧</div>
@@ -601,6 +602,13 @@ function setMode(el) {
       </div>
 
       <div class="column">
+        <div id="switcher">
+          <a class="mode action" onclick="setMode(this)" title="general" id="general">All Fields</a>
+          <a class="mode action" onclick="setMode(this)" title="imessage" id="imessage">iMessage</a>
+          <a class="mode action" onclick="setMode(this)" title="discord" id="discord">Discord</a>
+          <a class="mode action" onclick="setMode(this)" title="slack" id="slack">Slack</a>
+          <a class="mode action" onclick="setMode(this)" title="twitter" id="twitter">Twitter</a>
+        </div>
         <div class="card">
           <input id="i_preview" type="image" target="i" class="i_preview" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
           <div class="row">
@@ -620,14 +628,6 @@ function setMode(el) {
         </div>
       </div>
       
-
-    <div id="switcher">
-      <a class="mode action" onclick="setMode(this)" title="general" id="general">All Fields</a>
-      <a class="mode action" onclick="setMode(this)" title="imessage" id="imessage">iMessage</a>
-      <a class="mode action" onclick="setMode(this)" title="discord" id="discord">Discord</a>
-      <a class="mode action" onclick="setMode(this)" title="slack" id="slack">Slack</a>
-      <a class="mode action" onclick="setMode(this)" title="twitter" id="twitter">Twitter</a>
-    </div>
 
   </form>
 </div>
