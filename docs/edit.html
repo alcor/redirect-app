@@ -10,12 +10,9 @@
     --text-color:  #16161d;
     --body-color: var(--arc-background-simple-color, #E9E9EB);
     --text-color: var(--arc-palette-title, #16161d);
-
     --card-color: rgba(255,255,255,0.6);
-  }
-  :root {
-  /* --shadow-color: var(--arc-palette-title); */
-  --shadow-color: rgba(0,0,0,0.1);
+
+    --shadow-color: rgba(0,0,0,0.1);
     --shadow-elevation-low:
       0px 1px 1.1px var(--shadow-color),
       0.1px 1.7px 1.9px -1.2px var(--shadow-color),
@@ -26,8 +23,11 @@
       0.4px 8.2px 9.2px -1.7px var(--shadow-color),
       0.9px 20px 22.5px -2.5px var(--shadow-color);
 
+      --small-font-size: 13px;
+      --normal-font-size: 16px;
   }
-@media (prefers-color-scheme: dark) {
+
+  @media (prefers-color-scheme: dark) {
     :root {
       --body-color: #16161d;
       --background-color:  #16161d;
@@ -37,34 +37,68 @@
     }
   }
 
+  * {
+    font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
+  }
+
+
   body {
-    max-width:345px;
     margin:10vmin auto;
     background-color: var(--body-color);
   }
+
   #arc-theme {
     background:
     linear-gradient(0deg, var(--arc-background-gradient-overlay-color1) 0%, transparent 100%),
     linear-gradient(90deg, var(--arc-background-gradient-color0) 0%, var(--arc-background-gradient-color1) 100%);
     position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    opacity:0.2
+    z-index:-1;
+    top:0; left:0; right:0; bottom:0;
+    opacity:0.2;
   }
 
   body, input, textarea {
-    font-family:sans-serif;
-
+    
   }
 
   textarea {
-      resize: none;
-      border:0;
+    resize: none;
+    border:0;
     background-color: transparent;
-    padding:.5em;
+    padding:0.1em .5em;
     flex: 1 1 auto;
-    margin:0 0.5em;
     color: var(--text-color);
+  }
+
+  .card textarea {
+  
+    margin:0 0.5em;
+  }
+    #domain {
+      padding: 0.25em 0.5em;
+      margin:0 0.5em;
+      opacity:0.5;
+      font-size:smaller;
+      display:none;
+      cursor: not-allowed;
     }
+
+  body.twitter #domain,
+  body.imessage #domain {
+    margin-top:-0.2em;
+    display:block;
+  }
+  body.imessage #siterow {
+    order:100;
+    justify-content: space-between;
+  }
+
+  body.twitter .card {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+  }
+  body.imessage .card {
+    background-color:#eee;
+  }
 
   input {
     border:0;
@@ -87,48 +121,145 @@
     margin-bottom:0.5em;
   }
 
+  input.i_preview:hover {
+    opacity:0.5;
+  }
+
   textarea[name="t"] {
     font-weight:600;
     
   }
 
   textarea[name="d"] {
-    max-height:5em;
+    max-height:7em;
   }
   textarea[name="u"] {
     opacity:0.5;
+    margin-bottom:1em;
+  }
+
+
+
+  body.imessage textarea[name="d"],
+  body.imessage textarea[name="s"],
+  body.twitter textarea[name="s"]
+  {
+    display:none;
+  }
+
+  body.discord textarea[name="t"],
+  body.slack textarea[name="t"] {
+    color:blue;
+    font-weight:normal;
+  }
+  
+  body.slack textarea[name="s"] {
+    font-weight:bold;
+  }
+
+  body.discord textarea[name="s"] {
+    font-size:var(--small-font-size);
+  }
+
+  body.slack #i_preview,
+  body.discord #i_preview {
+    order:100;
+    margin:1em;
+    border-radius:8px;
+  }
+
+  body.slack #s {
+    font-weight:bold;
+  }
+
+  body.slack .card,
+  body.discord .card {
+    padding-top:1em;
+    border-left:4px solid currentColor;
   }
 
   .column {
     display:flex;
     flex-direction:column;
     flex: 1 1 auto;
+    max-width:345px;
+    min-width:300px;
+    margin-right:1em;
   }
   .row {
     display:flex;
     flex-direction:row;
   }
 
-  .column div:first-child {
-    flex: 10 1 auto;
+  #urlcolumn {
+    margin-bottom:1em;
   }
+  /* .column div:first-child {
+    flex: 10 1 auto;
+  } */
+
   form {
-    background-color: var(--card-color);
-    border-radius: 0.3em ;
-    overflow:hidden;
+    display:flex;
+    flex-direction:row;
+  }
+
+  @media screen and (max-width: 690px) {
+    form {
+      flex-direction:column;
+    }
+
+    #container {
+      max-width:345px !important;
+    }
+
+    #switcher {
+      margin-top:1em;
+      flex-direction:row !important;
+
+    }
+    #switcher .mode {
+      margin-right:1em;
+    }
+  }
+  
+  
+  .card {
     display:flex;
     flex-direction:column;
-    padding-bottom:1em;
-
     box-shadow: var(--shadow-elevation-medium);
+    padding-bottom:0.5em;
+    background-color: var(--card-color);
+    border-radius: 10px;
+    overflow:hidden;
   }
+
+
+  body #linkbot {
+    display:none;
+  }
+  body.discord .card {
+    border-radius:2px;
+  }
+  body.slack .card {
+    border-radius:4px;
+  }
+
+  body.twitter .card {
+    border-radius:15px;
+  }
+
   #container {
-    transform:rotate(-2deg);
+    /* transform:rotate(-2deg); */
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+    max-width:690px;
+    margin:auto;
   }
 
   #f_preview {
-    width:64px;
-    height:64px;
+    width:16px;
+    height:16px;
     background-color:var(--image-color);
     flex: 0 0 auto;
     margin-right:12px;
@@ -137,14 +268,37 @@
     border-radius:4px;
   }
 
+  #u {
+    margin:0;
+  }
+
+  .action {
+    width: 24px;
+    height: 24px;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAiIGhlaWdodD0iMjQiIGZpbGw9ImN1cnJlbnRDb2xvciIgdmlld0JveD0iMCAwIDEyMCAyNCI+CiAgPG1hc2sgaWQ9ImEiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgeD0iMCIgeT0iMCIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgc3R5bGU9Im1hc2stdHlwZTphbHBoYSI+CiAgICA8cGF0aCBkPSJNMCAwaDI0djI0SDB6Ii8+CiAgPC9tYXNrPgogIDxnIG1hc2s9InVybCgjYSkiPgogICAgPHBhdGggZD0iTTEwLjI1IDIxdi01Ljk1TDUuMSAxOC4wMjUgMy4zNSAxNWw1LjE1LTMtNS4xNS0yLjk3NUw1LjEgNmw1LjE1IDIuOTc1VjNoMy41djUuOTc1TDE4LjkgNmwxLjc1IDMuMDI1TDE1LjUgMTJsNS4xNSAzLTEuNzUgMy4wMjUtNS4xNS0yLjk3NVYyMWgtMy41WiIvPgogIDwvZz4KICA8bWFzayBpZD0iYiIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiB4PSIyNCIgeT0iMCIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgc3R5bGU9Im1hc2stdHlwZTphbHBoYSI+CiAgICA8cGF0aCBkPSJNMjQgMGgyNHYyNEgyNHoiLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNiKSI+CiAgICA8cGF0aCBkPSJNMjYgMjJWNGMwLS41NS4xOTYtMS4wMi41ODctMS40MTNBMS45MjYgMS45MjYgMCAwIDEgMjggMmgxNmMuNTUgMCAxLjAyLjE5NiAxLjQxMy41ODcuMzkuMzkzLjU4Ny44NjMuNTg3IDEuNDEzdjEyYzAgLjU1LS4xOTYgMS4wMi0uNTg3IDEuNDEzQTEuOTI2IDEuOTI2IDAgMCAxIDQ0IDE4SDMwbC00IDRaIi8+CiAgPC9nPgogIDxwYXRoIGQ9Ik03MC40NiA2Yy0uNzcuMzUtMS42LjU4LTIuNDYuNjkuODgtLjUzIDEuNTYtMS4zNyAxLjg4LTIuMzgtLjgzLjUtMS43NS44NS0yLjcyIDEuMDVDNjYuMzcgNC41IDY1LjI2IDQgNjQgNGMtMi4zNSAwLTQuMjcgMS45Mi00LjI3IDQuMjkgMCAuMzQuMDQuNjcuMTEuOTgtMy41Ni0uMTgtNi43My0xLjg5LTguODQtNC40OC0uMzcuNjMtLjU4IDEuMzctLjU4IDIuMTUgMCAxLjQ5Ljc1IDIuODEgMS45MSAzLjU2LS43MSAwLTEuMzctLjItMS45NS0uNXYuMDNjMCAyLjA4IDEuNDggMy44MiAzLjQ0IDQuMjFhNC4yMiA0LjIyIDAgMCAxLTEuOTMuMDcgNC4yOCA0LjI4IDAgMCAwIDQgMi45OCA4LjUyMSA4LjUyMSAwIDAgMS01LjMzIDEuODRjLS4zNCAwLS42OC0uMDItMS4wMi0uMDYgMS45IDEuMjIgNC4xNiAxLjkzIDYuNTggMS45M0M2NCAyMSA2OC4zMyAxNC40NiA2OC4zMyA4Ljc5YzAtLjE5IDAtLjM3LS4wMS0uNTYuODQtLjYgMS41Ni0xLjM2IDIuMTQtMi4yM1pNNzggMTVhMiAyIDAgMSAxLTItMmgydjJabTEgMGEyIDIgMCAwIDEgNCAwdjVhMiAyIDAgMCAxLTQgMHYtNVptMi04YTIgMiAwIDEgMSAyLTJ2MmgtMlptMCAxYTIgMiAwIDAgMSAwIDRoLTVhMiAyIDAgMCAxIDAtNGg1Wm04IDJhMiAyIDAgMSAxIDIgMmgtMnYtMlptLTEgMGEyIDIgMCAwIDEtNCAwVjVhMiAyIDAgMSAxIDQgMHY1Wm0tMiA4YTIgMiAwIDEgMS0yIDJ2LTJoMlptMC0xYTIgMiAwIDAgMSAwLTRoNWEyIDIgMCAwIDEgMCA0aC01Wm0yOS45NTItMTEuMzI4Yy0xLjkwNC0xLjUzLTQuOTE2LTEuNzktNS4wNDQtMS44YS40NzcuNDc3IDAgMCAwLS40NzQuMjggMy43MTUgMy43MTUgMCAwIDAtLjE0NS4zOThjMS4yNTkuMjEyIDIuODA2LjY0IDQuMjA2IDEuNTFhLjQ4LjQ4IDAgMCAxLS41MDUuODEyYy0yLjQwNi0xLjQ5Mi01LjQxMi0xLjU2Ny01Ljk5LTEuNTY3LS41NzggMC0zLjU4NS4wNzUtNS45ODkgMS41NjdhLjQ3OS40NzkgMCAxIDEtLjUwNS0uODEzYzEuNC0uODY4IDIuOTQ2LTEuMjk3IDQuMjA2LTEuNTA5LS4wNzQtLjIzNi0uMTQtLjM4Ni0uMTQ1LS4zOThhLjQ3My40NzMgMCAwIDAtLjQ3NS0uMjhjLS4xMjcuMDEtMy4xMzkuMjctNS4wNjkgMS44MjItMS4wMDguOTMxLTMuMDIzIDYuMzgtMy4wMjMgMTEuMDlhLjQ4LjQ4IDAgMCAwIC4wNjMuMjM2YzEuMzkxIDIuNDQzIDUuMTg1IDMuMDgzIDYuMDUgMy4xMTFoLjAxNWEuNDc4LjQ3OCAwIDAgMCAuMzg3LS4xOTdsLjg3NS0xLjIwMmMtMi4zNTktLjYxLTMuNTY0LTEuNjQ1LTMuNjM0LTEuNzA2YS40NzguNDc4IDAgMCAxIC42MzItLjcxOGMuMDI5LjAyNiAyLjI0OCAxLjkxIDYuNjEyIDEuOTEgNC4zNzIgMCA2LjU5MS0xLjg5MiA2LjYxMy0xLjkxYS40NzkuNDc5IDAgMCAxIC42MzIuNzE3Yy0uMDcuMDYyLTEuMjc1IDEuMDk2LTMuNjM0IDEuNzA2bC44NzUgMS4yMDJjLjA5LjEyNC4yMzQuMTk3LjM4Ny4xOTdoLjAxNWMuODY1LS4wMjcgNC42NTktLjY2NyA2LjA1LTMuMTFhLjQ4Ni40ODYgMCAwIDAgLjA2Mi0uMjM3YzAtNC43MS0yLjAxNS0xMC4xNTgtMy4wNDgtMTEuMTFabS0xMS4wNjEgOS4xOThjLS45MjQgMC0xLjY3NC0uODU3LTEuNjc0LTEuOTEzcy43NDktMS45MTMgMS42NzQtMS45MTNjLjkyNSAwIDEuNjc0Ljg1NyAxLjY3NCAxLjkxM3MtLjc0OSAxLjkxMy0xLjY3NCAxLjkxM1ptNi4yMTggMGMtLjkyNCAwLTEuNjc0LS44NTctMS42NzQtMS45MTNzLjc0OS0xLjkxMyAxLjY3NC0xLjkxM2MuOTI0IDAgMS42NzQuODU3IDEuNjc0IDEuOTEzcy0uNzUgMS45MTMtMS42NzQgMS45MTNaIi8+Cjwvc3ZnPg==);
+  }
+  @media screen and (prefers-color-scheme: dark) {
+    .action {
+      background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAiIGhlaWdodD0iMjQiIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAxMjAgMjQiPgogIDxtYXNrIGlkPSJhIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHg9IjAiIHk9IjAiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHN0eWxlPSJtYXNrLXR5cGU6YWxwaGEiPgogICAgPHBhdGggZmlsbD0iI0Q5RDlEOSIgZD0iTTAgMGgyNHYyNEgweiIvPgogIDwvbWFzaz4KICA8ZyBtYXNrPSJ1cmwoI2EpIj4KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xMC4yNSAyMXYtNS45NUw1LjEgMTguMDI1IDMuMzUgMTVsNS4xNS0zLTUuMTUtMi45NzVMNS4xIDZsNS4xNSAyLjk3NVYzaDMuNXY1Ljk3NUwxOC45IDZsMS43NSAzLjAyNUwxNS41IDEybDUuMTUgMy0xLjc1IDMuMDI1LTUuMTUtMi45NzVWMjFoLTMuNVoiLz4KICA8L2c+CiAgPG1hc2sgaWQ9ImIiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgeD0iMjQiIHk9IjAiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHN0eWxlPSJtYXNrLXR5cGU6YWxwaGEiPgogICAgPHBhdGggZmlsbD0iI0Q5RDlEOSIgZD0iTTI0IDBoMjR2MjRIMjR6Ii8+CiAgPC9tYXNrPgogIDxnIG1hc2s9InVybCgjYikiPgogICAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTI2IDIyVjRjMC0uNTUuMTk2LTEuMDIuNTg3LTEuNDEzQTEuOTI2IDEuOTI2IDAgMCAxIDI4IDJoMTZjLjU1IDAgMS4wMi4xOTYgMS40MTMuNTg3LjM5LjM5My41ODcuODYzLjU4NyAxLjQxM3YxMmMwIC41NS0uMTk2IDEuMDItLjU4NyAxLjQxM0ExLjkyNiAxLjkyNiAwIDAgMSA0NCAxOEgzMGwtNCA0WiIvPgogIDwvZz4KICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJNNzAuNDYgNmMtLjc3LjM1LTEuNi41OC0yLjQ2LjY5Ljg4LS41MyAxLjU2LTEuMzcgMS44OC0yLjM4LS44My41LTEuNzUuODUtMi43MiAxLjA1QzY2LjM3IDQuNSA2NS4yNiA0IDY0IDRjLTIuMzUgMC00LjI3IDEuOTItNC4yNyA0LjI5IDAgLjM0LjA0LjY3LjExLjk4LTMuNTYtLjE4LTYuNzMtMS44OS04Ljg0LTQuNDgtLjM3LjYzLS41OCAxLjM3LS41OCAyLjE1IDAgMS40OS43NSAyLjgxIDEuOTEgMy41Ni0uNzEgMC0xLjM3LS4yLTEuOTUtLjV2LjAzYzAgMi4wOCAxLjQ4IDMuODIgMy40NCA0LjIxYTQuMjIgNC4yMiAwIDAgMS0xLjkzLjA3IDQuMjggNC4yOCAwIDAgMCA0IDIuOTggOC41MjEgOC41MjEgMCAwIDEtNS4zMyAxLjg0Yy0uMzQgMC0uNjgtLjAyLTEuMDItLjA2IDEuOSAxLjIyIDQuMTYgMS45MyA2LjU4IDEuOTNDNjQgMjEgNjguMzMgMTQuNDYgNjguMzMgOC43OWMwLS4xOSAwLS4zNy0uMDEtLjU2Ljg0LS42IDEuNTYtMS4zNiAyLjE0LTIuMjNaTTc4IDE1YTIgMiAwIDEgMS0yLTJoMnYyWm0xIDBhMiAyIDAgMCAxIDQgMHY1YTIgMiAwIDAgMS00IDB2LTVabTItOGEyIDIgMCAxIDEgMi0ydjJoLTJabTAgMWEyIDIgMCAwIDEgMCA0aC01YTIgMiAwIDAgMSAwLTRoNVptOCAyYTIgMiAwIDEgMSAyIDJoLTJ2LTJabS0xIDBhMiAyIDAgMCAxLTQgMFY1YTIgMiAwIDEgMSA0IDB2NVptLTIgOGEyIDIgMCAxIDEtMiAydi0yaDJabTAtMWEyIDIgMCAwIDEgMC00aDVhMiAyIDAgMCAxIDAgNGgtNVptMjkuOTUyLTExLjMyOGMtMS45MDQtMS41My00LjkxNi0xLjc5LTUuMDQ0LTEuOGEuNDc3LjQ3NyAwIDAgMC0uNDc0LjI4IDMuNzE1IDMuNzE1IDAgMCAwLS4xNDUuMzk4YzEuMjU5LjIxMiAyLjgwNi42NCA0LjIwNiAxLjUxYS40OC40OCAwIDAgMS0uNTA1LjgxMmMtMi40MDYtMS40OTItNS40MTItMS41NjctNS45OS0xLjU2Ny0uNTc4IDAtMy41ODUuMDc1LTUuOTg5IDEuNTY3YS40NzkuNDc5IDAgMSAxLS41MDUtLjgxM2MxLjQtLjg2OCAyLjk0Ni0xLjI5NyA0LjIwNi0xLjUwOS0uMDc0LS4yMzYtLjE0LS4zODYtLjE0NS0uMzk4YS40NzMuNDczIDAgMCAwLS40NzUtLjI4Yy0uMTI3LjAxLTMuMTM5LjI3LTUuMDY5IDEuODIyLTEuMDA4LjkzMS0zLjAyMyA2LjM4LTMuMDIzIDExLjA5YS40OC40OCAwIDAgMCAuMDYzLjIzNmMxLjM5MSAyLjQ0MyA1LjE4NSAzLjA4MyA2LjA1IDMuMTExaC4wMTVhLjQ3OC40NzggMCAwIDAgLjM4Ny0uMTk3bC44NzUtMS4yMDJjLTIuMzU5LS42MS0zLjU2NC0xLjY0NS0zLjYzNC0xLjcwNmEuNDc4LjQ3OCAwIDAgMSAuNjMyLS43MThjLjAyOS4wMjYgMi4yNDggMS45MSA2LjYxMiAxLjkxIDQuMzcyIDAgNi41OTEtMS44OTIgNi42MTMtMS45MWEuNDc5LjQ3OSAwIDAgMSAuNjMyLjcxN2MtLjA3LjA2Mi0xLjI3NSAxLjA5Ni0zLjYzNCAxLjcwNmwuODc1IDEuMjAyYy4wOS4xMjQuMjM0LjE5Ny4zODcuMTk3aC4wMTVjLjg2NS0uMDI3IDQuNjU5LS42NjcgNi4wNS0zLjExYS40ODYuNDg2IDAgMCAwIC4wNjItLjIzN2MwLTQuNzEtMi4wMTUtMTAuMTU4LTMuMDQ4LTExLjExWm0tMTEuMDYxIDkuMTk4Yy0uOTI0IDAtMS42NzQtLjg1Ny0xLjY3NC0xLjkxM3MuNzQ5LTEuOTEzIDEuNjc0LTEuOTEzYy45MjUgMCAxLjY3NC44NTcgMS42NzQgMS45MTNzLS43NDkgMS45MTMtMS42NzQgMS45MTNabTYuMjE4IDBjLS45MjQgMC0xLjY3NC0uODU3LTEuNjc0LTEuOTEzcy43NDktMS45MTMgMS42NzQtMS45MTNjLjkyNCAwIDEuNjc0Ljg1NyAxLjY3NCAxLjkxM3MtLjc1IDEuOTEzLTEuNjc0IDEuOTEzWiIvPgo8L3N2Zz4=);
+    }
+  }
+    
+  
+
   #rurl, #linkbot {
     border:0;
-    padding:0.5em 1.5em;
-    font-size:0.8em;
+    margin:0;
+    margin-top:1em;
+    /* padding:0.5em 1.5em; */
+    font-size:var(--small-font-size);
     color:var(--text-color);
-    font-family:monospace;
+    
     width:100%;
+    max-height:4em;
+    height:4em !important;
+    line-height:1.33em;
     box-sizing:border-box;
+    
   }
   #fetch {
     opacity:0.1;
@@ -154,6 +308,58 @@
     opacity:1
   }
 
+  #switcher {
+    cursor: pointer;
+    min-width:200px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+  }
+  .mode {
+    display: block;
+    padding:0em;
+    opacity:0.8;
+    color:transparent;
+    font-size:24px;
+    opacity:0.3;
+  }
+
+  .mode:hover {
+    opacity:1.0;
+  }
+
+  .mode#imessage { background-position: -1em 0; }
+  .mode#twitter { background-position: -2em 0; }
+  .mode#slack { background-position: -3em 0; }
+  .mode#discord { background-position: -4em 0; }
+
+  body.discord #discord,
+  body.slack #slack,
+  body.imessage #imessage,
+  body.general #general,
+  body.twitter #twitter
+  {
+    opacity:1.0;
+  }
+
+  h1 {
+    font-weight:900;
+    font-size: 200%;;
+    margin:0;
+    padding:0;
+    margin-left:0.25em;
+    margin-bottom:1em;
+    color: var(--text-color)
+  }
+
+  h1 {
+  
+  }
+
+  #siterow, #s {
+    min-height:24px;
+    line-height:18px;
+  }
   </style>
 <script>
 
@@ -219,16 +425,17 @@ async function fetchMetadata() {
   let metadata = await propogateData(url);
 
 
-  console.log("metadata", metadata)
+  console.log("Downloaded Metadata:", metadata)
   if (metadata.title) document.getElementById("t").value = metadata.title;
-  if (metadata.description) document.getElementById("d").value = metadata.description;
+  
+  if (metadata.description) document.getElementById("d").value = metadata.description.substring(0,200);
   if (metadata.imageSecureUrl) metadata.image = metadata.imageSecureUrl;
   if (metadata.image) document.getElementById("i").value = metadata.image;
   if (metadata.image) document.getElementById("i_preview").src = metadata.image;
 
   if (metadata.favicon) document.getElementById("f").value = metadata.favicon;
   if (metadata.favicon) document.getElementById("f_preview").src = metadata.favicon;
-  if (metadata.site_name) document.getElementById("s").value = metadata.site_name;
+  if (metadata.site_name) document.getElementById("s").value = new URL(metadata.url).hostname.replace("www.", "");
   if (metadata.url) document.getElementById("u").value = metadata.url;
   parse();
 }
@@ -250,6 +457,10 @@ async function propogateData(site) {
 }
 function load() {
   console.log(location)
+  
+  document.body.className = localStorage.getItem("mode") || "general";
+
+  
   let data = localStorage.getItem("data");
   if (location.pathname.length > 5) {
     let path = location.pathname.substring(5);
@@ -257,17 +468,17 @@ function load() {
   } else if (data) {
     data = JSON.parse(data)    
   }
-  
+
+
   if (data) {
     console.log("Restoring", data)
     let form = document.forms[0];
     for (let key in data) {
-      console.log("key", key);
       form[key].value = data[key];
       if (!data[key].length) continue;
       if (key == "i") document.getElementById("i_preview").src = imageToURL(data[key]);
       if (key == "f") document.getElementById("f_preview").src = imageToURL(data[key]);
-      console.log("key", key, data[key], form[key])
+      
     }
     parse();
   }
@@ -279,20 +490,26 @@ function adjustHeight(el) {  /* javascript */
 }
 
 function parse() {
+  let mode = document.body.className;
+
   let form = document.forms[0]
 
   let formData = new FormData(form);
-  console.log("formdata", formData.keys)
+  
   let formObj = Object.fromEntries(formData);
-  console.log("DATA", formObj)
+  
   localStorage.setItem("data", JSON.stringify(formObj));
 
-  console.log("object", formObj);
   let url = formData.get("u");
   formData.delete("u")
   let title = formData.get("t");
   formData.delete("t")
 
+  
+  if (mode == "imessage") {
+    formData.delete("d");
+    formData.delete("s");
+  }
   if (title) {
     let path = `/${encodePrettyComponent(title)}`
     let encodedFields = ["i", "v", "f"];
@@ -314,14 +531,14 @@ function parse() {
     } else {
       path += "/u/" + encodeURL(url) + "/";
     }
-    
 
-    console.log(path);
     
-
     let prefix = new URL(url).hostname.replace("www.", "").replace(".com","").replace(".", "-") + ".";
-    origin = `https://${prefix}redirect.app`
-    document.getElementById("rurl").value = `${origin}/m${path}`;
+    origin = `${prefix}redirect.app`
+    document.getElementById("rurl").value = `https://${origin}/m${path}`;
+    document.getElementById("domain").innerHTML = origin;
+
+    document.getElementById("s").placeholder = origin;
 
     let linkbot = `/embed url:${url} title:${title}`;
     if (formObj.d.length) linkbot += ` description:${formObj.d}`;
@@ -332,7 +549,6 @@ function parse() {
   }
     
   Array.from(document.querySelectorAll("textarea")).forEach((el) => {
-    console.log("el", el)
     adjustHeight(el);
   })
 }
@@ -362,32 +578,60 @@ function selectElement(el) {
 
 }
 
+function setMode(el) {
+  let mode = el.id;
+  document.body.className = mode;
+  localStorage.setItem("mode", mode);
+  parse();
+}
 </script>
+<body class="general">
 <div id="arc-theme"></div>
 <div id="container">
-<form id="form" onsubmit="parse(); return false;">
-  <input id="i_preview" type="image" target="i" class="i_preview" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
-  <div class="row">
-    <div class="column">
-      <textarea id="t" name="t" oninput="parse()" placeholder="Title"></textarea>
-      <textarea id="d" name="d" oninput="parse()" placeholder="Description"></textarea>
-      <input id="s" name="s" type="hidden" oninput="parse()">
-      <input id="i" name="i" type="hidden" oninput="parse()">
-      <input id="f" name="f" type="hidden" oninput="parse()">
-      <div class="row">
-      <textarea id="u" name="u" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="example.com"></textarea>
-      <div id="fetch" onclick="fetchMetadata()">↧</div>
+  <h1>make a redirect ↗</h1>
+  <form id="form" onsubmit="parse(); return false;">
+    
+      <div class="column" id="urlcolumn">
+        <div class="row">
+          <textarea id="u" name="u" oninput="parse()" oncontextmenu="fetchMetadata(); return false;" placeholder="paste a url..."></textarea>
+          <div id="fetch" onclick="fetchMetadata()">↧</div>
+        </div>
+        <textarea type="text" id="rurl" onclick="selectElement(this)" value="https://redirect.app/"></textarea>
+        <textarea type="text" id="linkbot" onclick="selectElement(this)" value="/embed url:"></textarea>
       </div>
-      <button type="sumbit" style="display:none">submit</button>
-    </div>
-    <input type="image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A" id="f_preview" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
-  </div>
 
-</form>
-<textarea type="text" id="rurl" onclick="selectElement(this)" value="https://redirect.app/"></textarea>
-<textarea type="text" id="linkbot" onclick="selectElement(this)" value="/embed url:"></textarea>
+      <div class="column">
+        <div class="card">
+          <input id="i_preview" type="image" target="i" class="i_preview" onclick="getURL(this)" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A">
+          <div class="row">
+            <div class="column">
+              <div class="row" id="siterow">
+              <textarea id="s" name="s" oninput="parse()" placeholder="site name"></textarea>
+              <div id="domain">example.com</div>
+              <input type="image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%%3C/svg%3E%0A" id="f_preview" target="f" onclick="getURL(this)" oninput="parse()" placeholder="icon">
+              </div>
+              <textarea id="t" name="t" oninput="parse()" placeholder="title"></textarea>
+              <textarea id="d" name="d" oninput="parse()" placeholder="description"></textarea>
+              <input id="i" name="i" type="hidden" oninput="parse()">
+              <input id="f" name="f" type="hidden" oninput="parse()">
+
+              <button type="sumbit" style="display:none">submit</button>
+            </div>
+        </div>
+      </div>
+      
+
+    <div id="switcher">
+      <a class="mode action" onclick="setMode(this)" title="general" id="general">All Fields</a>
+      <a class="mode action" onclick="setMode(this)" title="imessage" id="imessage">iMessage</a>
+      <a class="mode action" onclick="setMode(this)" title="discord" id="discord">Discord</a>
+      <a class="mode action" onclick="setMode(this)" title="slack" id="slack">Slack</a>
+      <a class="mode action" onclick="setMode(this)" title="twitter" id="twitter">Twitter</a>
+    </div>
+
+  </form>
 </div>
 <script>
   load();
-
 </script>
+</body>
