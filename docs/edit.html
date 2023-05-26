@@ -4,12 +4,14 @@
 <style>
 
   :root {
-    --body-color:  #E9E9EB;
+    --body-color:  #ffffff;
     --background-color:  #fefefe;
     --image-color:  #f8f8f8;
     --text-color:  #16161d;
     --body-color: var(--arc-background-simple-color, #E9E9EB);
     --text-color: var(--arc-palette-title, #16161d);
+
+    --card-color: rgba(255,255,255,0.6);
   }
   :root {
   /* --shadow-color: var(--arc-palette-title); */
@@ -25,14 +27,15 @@
       0.9px 20px 22.5px -2.5px var(--shadow-color);
 
   }
-  /* media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
     :root {
       --body-color: #16161d;
       --background-color:  #16161d;
       --image-color:  #f8f8f8;
-      --text-color:  #fafafa;
+      --text-color: #fafafa;
+      --card-color: rgba(255,255,255,0.1);
     }
-  } */
+  }
 
   body {
     max-width:345px;
@@ -43,9 +46,9 @@
     background:
     linear-gradient(0deg, var(--arc-background-gradient-overlay-color1) 0%, transparent 100%),
     linear-gradient(90deg, var(--arc-background-gradient-color0) 0%, var(--arc-background-gradient-color1) 100%);
-  position:fixed;
-  top:0;left:0;right:0;bottom:0;
-  opacity:0.5
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    opacity:0.2
   }
 
   body, input, textarea {
@@ -60,6 +63,7 @@
     padding:.5em;
     flex: 1 1 auto;
     margin:0 0.5em;
+    color: var(--text-color);
     }
 
   input {
@@ -69,6 +73,7 @@
     flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-color);
   }
   input::placeholder {
     opacity:0.4;
@@ -84,7 +89,7 @@
 
   textarea[name="t"] {
     font-weight:600;
-    color:black;
+    
   }
 
   textarea[name="d"] {
@@ -108,14 +113,13 @@
     flex: 10 1 auto;
   }
   form {
-    background-color: var(--background-color);
+    background-color: var(--card-color);
     border-radius: 0.3em ;
     overflow:hidden;
     display:flex;
     flex-direction:column;
     padding-bottom:1em;
 
-    background-color: var(--background-color);
     box-shadow: var(--shadow-elevation-medium);
   }
   #container {
